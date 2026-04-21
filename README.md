@@ -33,8 +33,8 @@ A full stack web application built with Node.js, Express, SQLite and vanilla Jav
    http://localhost:3000
 
 ## Login credentials
-- Username: (your admin username)
-- Password: (your admin password)
+- Username: Sphelele Mvubu
+- Password: 594908
 
 ## Pages
 - http://localhost:3000 — Admin login
@@ -42,4 +42,4 @@ A full stack web application built with Node.js, Express, SQLite and vanilla Jav
 - http://localhost:3000/contact.html — Public contact form
 
 ## Author
-Your Name
+Sphelele Mvubu(Me).
