@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CRM Dashboard</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f2f5;
+      color: #111;
+    }
+
+    /* TOP BAR */
+    .topbar {
+      background: white;
+      padding: 0 1.5rem;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #eee;
+    }
+
+    .topbar h1 { font-size: 18px; font-weight: 600; }
+
+    .topbar-right { display: flex; align-items: center; gap: 12px; }
+
+    .admin-badge {
+      font-size: 12px;
+      background: #ede9fe;
+      color: #4f46e5;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-weight: 500;
+    }
+
+    .logout-btn {
+      font-size: 13px;
+      color: #888;
+      background: none;
+      border: 1px solid #ddd;
+      padding: 5px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .logout-btn:hover { background: #f5f5f5; }
+
+    .content { padding: 1.5rem; max-width: 1100px; margin: 0 auto; }
+
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 1.5rem; }
+
+    .stat-card {
+      background: white;
+      border-radius: 10px;
+      padding: 1.1rem 1.2rem;
+      border: 1px solid #eee;
+    }
+
+    .stat-label { font-size: 11px; color: #999; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+    .stat-num { font-size: 28px; font-weight: 600; }
+    .stat-num.purple { color: #4f46e5; }
+    .stat-num.blue { color: #0ea5e9; }
+    .stat-num.green { color: #16a34a; }
+    .stat-num.gray { color: #888; }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .toolbar input {
+      flex: 1;
+      min-width: 200px;
+      padding: 8px 12px;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 13px;
+      outline: none;
+    }
+
+    .toolbar input:focus { border-color: #4f46e5; }
+
+    .toolbar select {
+      padding: 8px 12px;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 13px;
+      outline: none;
+      background: white;
+    }
+
+    .add-btn {
+      padding: 8px 16px;
+      background: #4f46e5;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .add-btn:hover { background: #4338ca; }
+
+    .table-wrap {
+      background: white;
+      border-radius: 10px;
+      border: 1px solid #eee;
+      overflow: hidden;
+    }
+
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+
+    thead { background: #fafafa; }
+
+    th {
+      text-align: left;
+      padding: 12px 16px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #999;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid #eee;
+    }
+
+    td { padding: 13px 16px; border-bottom: 1px solid #f5f5f5; color: #333; }
+
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #fafafa; }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: capitalize;
+    }
+
+    .badge.new { background: #eff6ff; color: #2563eb; }
+    .badge.contacted { background: #fefce8; color: #b45309; }
+    .badge.converted { background: #f0fdf4; color: #16a34a; }
+
+    .action-btn {
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      border: 1px solid #e0e0e0;
+      background: white;
+      margin-right: 4px;
+    }
+
+    .action-btn:hover { background: #f5f5f5; }
+    .action-btn.delete { color: #e53e3e; border-color: #fed7d7; }
+    .action-btn.delete:hover { background: #fff5f5; }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      width: 100%;
+      max-width: 480px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal h2 { font-size: 18px; margin-bottom: 1.2rem; }
+
+    .form-group { margin-bottom: 1rem; }
+
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 5px;
+      text-transform: uppercase;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+      font-family: inherit;
+    }
+
+    .form-group textarea { height: 90px; resize: vertical; }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus { border-color: #4f46e5; }
+
+    .modal-actions { display: flex; gap: 10px; margin-top: 1.2rem; }
+
+    .btn-save {
+      flex: 1;
+      padding: 10px;
+      background: #4f46e5;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-cancel {
+      flex: 1;
+      padding: 10px;
+      background: white;
+      color: #555;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem;
+      color: #aaa;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <h1>Lead Management</h1>
+    <div class="topbar-right">
+      <span class="admin-badge">Admin</span>
+      <button class="logout-btn" onclick="logout()">Log out</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-label">Total Leads</div>
+        <div class="stat-num purple" id="stat-total">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">New</div>
+        <div class="stat-num blue" id="stat-new">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Contacted</div>
+        <div class="stat-num gray" id="stat-contacted">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Converted</div>
+        <div class="stat-num green" id="stat-converted">0</div>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <input type="text" id="search-input" placeholder="Search by name or email..." oninput="filterLeads()" />
+      <select id="filter-status" onchange="filterLeads()">
+        <option value="all">All Statuses</option>
+        <option value="new">New</option>
+        <option value="contacted">Contacted</option>
+        <option value="converted">Converted</option>
+      </select>
+      <button class="add-btn" onclick="openAddModal()">+ Add Lead</button>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Source</th>
+            <th>Status</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="leads-tbody">
+          <tr><td colspan="7" class="empty-state">Loading leads...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal">
+      <h2 id="modal-title">Add New Lead</h2>
+
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" id="field-name" placeholder="John Doe" />
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="field-email" placeholder="john@example.com" />
+      </div>
+      <div class="form-group">
+        <label>Phone</label>
+        <input type="text" id="field-phone" placeholder="555-0000" />
+      </div>
+      <div class="form-group">
+        <label>Source</label>
+        <select id="field-source">
+          <option value="website">Website</option>
+          <option value="referral">Referral</option>
+          <option value="social media">Social Media</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Status</label>
+        <select id="field-status">
+          <option value="new">New</option>
+          <option value="contacted">Contacted</option>
+          <option value="converted">Converted</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Notes</label>
+        <textarea id="field-notes" placeholder="Add any follow-up notes here..."></textarea>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+        <button class="btn-save" onclick="saveLead()">Save Lead</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let allLeads = [];
+    let editingId = null;
+
+    fetch('/api/auth-status')
+      .then(res => res.json())
+      .then(data => {
+        if (!data.isLoggedIn) window.location.href = '/';
+        else loadLeads();
+      });
+
+    function loadLeads() {
+      fetch('/api/leads')
+        .then(res => res.json())
+        .then(leads => {
+          allLeads = leads;
+          updateStats(leads);
+          renderTable(leads);
+        });
+    }
+
+    function updateStats(leads) {
+      document.getElementById('stat-total').textContent = leads.length;
+      document.getElementById('stat-new').textContent = leads.filter(l => l.status === 'new').length;
+      document.getElementById('stat-contacted').textContent = leads.filter(l => l.status === 'contacted').length;
+      document.getElementById('stat-converted').textContent = leads.filter(l => l.status === 'converted').length;
+    }
+
+    function renderTable(leads) {
+      const tbody = document.getElementById('leads-tbody');
+
+      if (leads.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No leads found</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = leads.map(lead => `
+        <tr>
+          <td><strong>${lead.name}</strong></td>
+          <td>${lead.email}</td>
+          <td>${lead.phone || '—'}</td>
+          <td>${lead.source}</td>
+          <td><span class="badge ${lead.status}">${lead.status}</span></td>
+          <td>${new Date(lead.created_at).toLocaleDateString()}</td>
+          <td>
+            <button class="action-btn" onclick="openEditModal(${lead.id})">Edit</button>
+            <button class="action-btn delete" onclick="deleteLead(${lead.id})">Delete</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function filterLeads() {
+      const search = document.getElementById('search-input').value.toLowerCase();
+      const status = document.getElementById('filter-status').value;
+
+      const filtered = allLeads.filter(lead => {
+        const matchesSearch = lead.name.toLowerCase().includes(search) || lead.email.toLowerCase().includes(search);
+        const matchesStatus = status === 'all' || lead.status === status;
+        return matchesSearch && matchesStatus;
+      });
+
+      renderTable(filtered);
+    }
+
+    function openAddModal() {
+      editingId = null;
+      document.getElementById('modal-title').textContent = 'Add New Lead';
+      document.getElementById('field-name').value = '';
+      document.getElementById('field-email').value = '';
+      document.getElementById('field-phone').value = '';
+      document.getElementById('field-source').value = 'website';
+      document.getElementById('field-status').value = 'new';
+      document.getElementById('field-notes').value = '';
+      document.getElementById('modal-overlay').classList.add('open');
+    }
+
+    function openEditModal(id) {
+      const lead = allLeads.find(l => l.id === id);
+      editingId = id;
+      document.getElementById('modal-title').textContent = 'Edit Lead';
+      document.getElementById('field-name').value = lead.name;
+      document.getElementById('field-email').value = lead.email;
+      document.getElementById('field-phone').value = lead.phone || '';
+      document.getElementById('field-source').value = lead.source;
+      document.getElementById('field-status').value = lead.status;
+      document.getElementById('field-notes').value = lead.notes || '';
+      document.getElementById('modal-overlay').classList.add('open');
+    }
+
+    function closeModal() {
+      document.getElementById('modal-overlay').classList.remove('open');
+    }
+
+    async function saveLead() {
+      const body = {
+        name: document.getElementById('field-name').value,
+        email: document.getElementById('field-email').value,
+        phone: document.getElementById('field-phone').value,
+        source: document.getElementById('field-source').value,
+        status: document.getElementById('field-status').value,
+        notes: document.getElementById('field-notes').value
+      };
+
+      if (!body.name || !body.email) {
+        alert('Name and email are required.');
+        return;
+      }
+
+      if (editingId) {
+        await fetch(`/api/leads/${editingId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+      } else {
+        await fetch('/api/leads', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+      }
+
+      closeModal();
+      loadLeads();
+    }
+
+    async function deleteLead(id) {
+      if (!confirm('Are you sure you want to delete this lead?')) return;
+      await fetch(`/api/leads/${id}`, { method: 'DELETE' });
+      loadLeads();
+    }
+
+    async function logout() {
+      await fetch('/api/logout', { method: 'POST' });
+      window.location.href = '/';
+    }
+  </script>
+
+</body>
+</html>
